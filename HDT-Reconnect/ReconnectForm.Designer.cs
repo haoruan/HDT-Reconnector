@@ -41,7 +41,7 @@ namespace HDT_Reconnect
             this.ReconnectButton.Name = "ReconnectButton";
             this.ReconnectButton.Size = new System.Drawing.Size(199, 47);
             this.ReconnectButton.TabIndex = 0;
-            this.ReconnectButton.Text = "Disconnect";
+            this.ReconnectButton.Text = "Reconnect";
             this.ReconnectButton.UseVisualStyleBackColor = true;
             this.ReconnectButton.Click += new System.EventHandler(this.ReconnectButton_Click);
             // 
@@ -61,6 +61,7 @@ namespace HDT_Reconnect
             this.ShowInTaskbar = false;
             this.Text = "Test";
             this.TopMost = true;
+            this.VisibleChanged += new System.EventHandler(this.ReconnectForm_VisibleChanged);
             this.ResumeLayout(false);
 
         }

@@ -15,7 +15,7 @@ namespace HDT_Reconnect
 
         public string Description => "Quickly skip hearthstone animation by disconnecting and reconnecting";
 
-        public string ButtonText => "None";
+        public string ButtonText => null;
 
         public string Author => "Hypervisor";
 
@@ -23,20 +23,26 @@ namespace HDT_Reconnect
 
         public MenuItem MenuItem => null;
 
+        private ReconnectForm reconnectForm;
+
         public void OnButtonPress()
         {
         }
 
         public void OnLoad()
         {
+            reconnectForm = new ReconnectForm();
         }
 
         public void OnUnload()
         {
+            reconnectForm.Dispose();
+            reconnectForm = null;
         }
 
         public void OnUpdate()
         {
+            reconnectForm.OnUpdate();
         }
     }
 }

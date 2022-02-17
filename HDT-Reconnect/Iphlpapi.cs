@@ -42,6 +42,27 @@ namespace HDT_Reconnect
             TCP_TABLE_OWNER_MODULE_ALL
         }
 
+        public enum SetTcpErrorCode
+        {
+            NO_ERROR = 0,
+            ERROR_ACCESS_DENIED = 5,
+            ERROR_INVALID_PARAMETER = 87,
+            ERROR_NOT_SUPPORTED = 50,
+            ERROR_NOT_ELEVATED = 317
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MIB_TCPROW
+        {
+            public uint state;
+            public uint localAddr;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            public byte[] localPort;
+            public uint remoteAddr;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            public byte[] remotePort;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct MIB_TCPROW_OWNER_PID
         {
@@ -103,7 +124,7 @@ namespace HDT_Reconnect
         private static extern uint GetExtendedTcpTable(IntPtr pTcpTable, ref int dwOutBufLen, bool sort, int ipVersion, TCP_TABLE_CLASS tblClass, uint reserved = 0);
 
         [DllImport("iphlpapi.dll", SetLastError = true)]
-        private static extern int SetTcpEntry(IntPtr pTcprow);
+        public static extern int SetTcpEntry(IntPtr pTcprow);
 
         public static List<MIB_TCPROW_OWNER_PID> GetAllTCPConnections()
         {
@@ -118,12 +139,12 @@ namespace HDT_Reconnect
             var dwNumEntriesField = typeof(IPT).GetField("dwNumEntries");
 
             // how much memory do we need?
-            GetExtendedTcpTable(IntPtr.Zero, ref buffSize, true, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_PID_CONNECTIONS);
+            GetExtendedTcpTable(IntPtr.Zero, ref buffSize, true, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_PID_ALL);
             IntPtr tcpTablePtr = Marshal.AllocHGlobal(buffSize);
 
             try
             {
-                uint ret = GetExtendedTcpTable(tcpTablePtr, ref buffSize, true, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_PID_ALL);
+                uint ret = GetExtendedTcpTable(tcpTablePtr, ref buffSize, false, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_PID_ALL);
                 if (ret != 0)
                     return new List<IPR>();
 
