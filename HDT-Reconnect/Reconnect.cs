@@ -30,7 +30,7 @@ namespace HDT_Reconnect
         public Reconnect()
         {
             Status = CONNECTION_STATUS.DISCONNECTED;
-            Iphlpapi.MIB_TCPROW hsTcpRow = getReconnectTcp();
+            Iphlpapi.MIB_TCPROW hsTcpRow = GetReconnectTcp();
             if (hsTcpRow.remoteAddr != 0)
             {
                 Status = CONNECTION_STATUS.CONNECTED;
@@ -39,7 +39,7 @@ namespace HDT_Reconnect
 
         public int Disconnect()
         {
-            Iphlpapi.MIB_TCPROW hsTcpRow = getReconnectTcp();
+            Iphlpapi.MIB_TCPROW hsTcpRow = GetReconnectTcp();
 
             hsTcpRow.state = (uint)Iphlpapi.MIB_TCP_STATE.MIB_TCP_STATE_DELETE_TCB;
 
@@ -50,22 +50,23 @@ namespace HDT_Reconnect
             switch (ret)
             {
                 case Iphlpapi.SetTcpErrorCode.NO_ERROR:
+                    Log.Info("Disconnect successfully");
                     Status = CONNECTION_STATUS.DISCONNECTED;
                     return 0;
                 case Iphlpapi.SetTcpErrorCode.ERROR_ACCESS_DENIED:
-                    Log.Error("Access Denied");
+                    Log.Error("Access denied");
                     return 1;
                 case Iphlpapi.SetTcpErrorCode.ERROR_INVALID_PARAMETER:
-                    Log.Error("Invalid Parameter");
+                    Log.Error("Invalid parameter");
                     return 1;
                 case Iphlpapi.SetTcpErrorCode.ERROR_NOT_ELEVATED:
-                    Log.Error("Not Elevated");
+                    Log.Error("Not elevated");
                     return 1;
                 case Iphlpapi.SetTcpErrorCode.ERROR_NOT_SUPPORTED:
-                    Log.Error("Not Supported");
+                    Log.Error("Not supported");
                     return 1;
                 default:
-                    Log.Error("Other Errors");
+                    Log.Error("Other errors");
                     return 1;
             }
         }
@@ -75,7 +76,7 @@ namespace HDT_Reconnect
             return Process.GetProcessesByName(HsName);
         }
 
-        private Iphlpapi.MIB_TCPROW getReconnectTcp()
+        private Iphlpapi.MIB_TCPROW GetReconnectTcp()
         {
             Process[] hsProcesses = GetHsProcess();
             List<Iphlpapi.MIB_TCPROW_OWNER_PID> tcprows = Iphlpapi.GetAllTCPConnections();

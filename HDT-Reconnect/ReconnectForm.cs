@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Hearthstone_Deck_Tracker.Utility.Logging;
-using Hearthstone_Deck_Tracker.API;
+using Hearthstone_Deck_Tracker;
 using Hearthstone_Deck_Tracker.Enums;
 
 namespace HDT_Reconnect
