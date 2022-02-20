@@ -29,12 +29,7 @@ namespace HDT_Reconnect
 
         public Reconnect()
         {
-            Status = CONNECTION_STATUS.DISCONNECTED;
-            Iphlpapi.MIB_TCPROW hsTcpRow = GetReconnectTcp();
-            if (hsTcpRow.remoteAddr != 0)
-            {
-                Status = CONNECTION_STATUS.CONNECTED;
-            }
+            Status = CONNECTION_STATUS.CONNECTED;
         }
 
         public int Disconnect()
@@ -88,20 +83,21 @@ namespace HDT_Reconnect
                 hsPids.Add((uint)hsProcess.Id);
             }
 
-            foreach (Iphlpapi.MIB_TCPROW_OWNER_PID tcprow in tcprows)
+            for (int i = tcprows.Count - 1; i >= 0; i--)
             {
-                if (hsPids.Contains(tcprow.ProcessId))
+                if (hsPids.Contains(tcprows[i].ProcessId))
                 {
-                    int remotePort = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(tcprow.remotePort, 0));
-                    string remoteAddr = IPAddress.Parse(tcprow.RemoteAddress.ToString()).ToString();
+                    int remotePort = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(tcprows[i].remotePort, 0));
+                    string remoteAddr = IPAddress.Parse(tcprows[i].RemoteAddress.ToString()).ToString();
                     Log.Info(String.Format("TCP connection: {0}:{1}", remoteAddr, remotePort));
 
                     if (remotePort != 443)
                     {
-                        hsTcpRow.localAddr = tcprow.localAddr;
-                        hsTcpRow.localPort = tcprow.localPort;
-                        hsTcpRow.remoteAddr = tcprow.remoteAddr;
-                        hsTcpRow.remotePort = tcprow.remotePort;
+                        hsTcpRow.localAddr = tcprows[i].localAddr;
+                        hsTcpRow.localPort = tcprows[i].localPort;
+                        hsTcpRow.remoteAddr = tcprows[i].remoteAddr;
+                        hsTcpRow.remotePort = tcprows[i].remotePort;
+                        break;
                     }
                 }
             }

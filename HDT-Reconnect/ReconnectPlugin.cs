@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 using System.Windows.Controls;
 using Hearthstone_Deck_Tracker.Plugins;
-using Hearthstone_Deck_Tracker;
+using Hearthstone_Deck_Tracker.API;
+using Hearthstone_Deck_Tracker.Enums;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace HDT_Reconnect
@@ -25,7 +26,7 @@ namespace HDT_Reconnect
 
         public MenuItem MenuItem { get; private set; }
 
-        private ReconnectForm reconnectForm;
+        private ReconnectPanel reconnectPanel;
 
         public void OnButtonPress()
         {
@@ -44,9 +45,9 @@ namespace HDT_Reconnect
 
         public void OnUpdate()
         {
-            if (reconnectForm != null)
+            if (reconnectPanel != null)
             {
-                reconnectForm.OnUpdate();
+                reconnectPanel.OnUpdate();
             }
         }
 
@@ -68,18 +69,19 @@ namespace HDT_Reconnect
                     return;
                 }
 
-                if (reconnectForm == null)
+                if (reconnectPanel == null)
                 {
-                    reconnectForm = new ReconnectForm();
+                    reconnectPanel = new ReconnectPanel();
+                    Core.OverlayCanvas.Children.Add(reconnectPanel);
                 }
             };
 
             MenuItem.Unchecked += (sender, args) =>
             {
-                if (reconnectForm != null)
+                if (reconnectPanel != null)
                 {
-                    reconnectForm.Dispose();
-                    reconnectForm = null;
+                    Core.OverlayCanvas.Children.Remove(reconnectPanel);
+                    reconnectPanel = null;
                 }
             };
         }
