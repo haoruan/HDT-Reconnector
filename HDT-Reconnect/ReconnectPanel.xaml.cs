@@ -57,7 +57,6 @@ namespace HDT_Reconnect
             if (Visibility != Visibility.Visible && !Core.Game.IsInMenu)
             {
                 Visibility = Visibility.Visible;
-                lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
             }
             else if (Visibility != Visibility.Hidden && Core.Game.IsInMenu)
             {
@@ -66,10 +65,9 @@ namespace HDT_Reconnect
 
             if (reconnect.Status == Reconnect.CONNECTION_STATUS.DISCONNECTED)
             {
-                if (Core.Game.CurrentGameStats.StartTime > lastGameStartTime)
+                if (IsGameReStart())
                 {
                     reconnect.Status = Reconnect.CONNECTION_STATUS.CONNECTED;
-                    //ReconnectButton.Text = Reconnect.ReconnectString;
                     ReconnectButton.Content = Reconnect.ReconnectString;
                 }
             }
@@ -112,7 +110,16 @@ namespace HDT_Reconnect
 
         private bool IsAbleToReconnect()
         {
-            return reconnect.Status == Reconnect.CONNECTION_STATUS.CONNECTED && Core.Game.CurrentGameStats.EndTime < lastGameStartTime;
+            return reconnect.Status == Reconnect.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
+        }
+
+        private bool IsGameReStart()
+        {
+            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
+        }
+        private bool IsGameEnd()
+        {
+            return Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
         }
     }
 }
