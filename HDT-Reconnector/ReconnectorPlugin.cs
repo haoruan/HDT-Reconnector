@@ -10,13 +10,13 @@ using Hearthstone_Deck_Tracker.API;
 using Hearthstone_Deck_Tracker.Enums;
 using MahApps.Metro.Controls.Dialogs;
 
-namespace HDT_Reconnect
+namespace HDT_Reconnector
 {
-    public class ReconnectPlugin : IPlugin
+    public class ReconnectorPlugin : IPlugin
     {
-        public string Name => "ReconnectPlugin";
+        public string Name => "Reconnector";
 
-        public string Description => "Quickly skip hearthstone animation by disconnecting and reconnecting";
+        public string Description => "Quickly skip hearthstone animation by disconnecting and reconnecting\n\nFor more information and updates, check out:\nhttps://github.com/haoruan/HDT-Reconnector";
 
         public string ButtonText => "No Settings";
 

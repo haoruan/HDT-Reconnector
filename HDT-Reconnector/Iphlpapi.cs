@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Net;
 
-namespace HDT_Reconnect
+namespace HDT_Reconnector
 {
     class Iphlpapi
     {

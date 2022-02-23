@@ -20,14 +20,14 @@ using System.Windows.Media.Animation;
 using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 
-namespace HDT_Reconnect
+namespace HDT_Reconnector
 {
     /// <summary>
     /// Interaction logic for ReconnectPanel.xaml
     /// </summary>
     public partial class ReconnectPanel : UserControl
     {
-        private Reconnect reconnect;
+        private Reconnector reconnect;
         private DateTime lastGameStartTime;
         private double oriWidth;
         private double oriHeight;
@@ -36,7 +36,7 @@ namespace HDT_Reconnect
 
         public ReconnectPanel()
         {
-            reconnect = new Reconnect();
+            reconnect = new Reconnector();
             InitializeComponent();
 
             oriHeight = ReconnectButton.Height;
@@ -63,12 +63,12 @@ namespace HDT_Reconnect
                 Visibility = Visibility.Hidden;
             }
 
-            if (reconnect.Status == Reconnect.CONNECTION_STATUS.DISCONNECTED)
+            if (reconnect.Status == Reconnector.CONNECTION_STATUS.DISCONNECTED)
             {
                 if (IsGameReStart())
                 {
-                    reconnect.Status = Reconnect.CONNECTION_STATUS.CONNECTED;
-                    ReconnectButton.Content = Reconnect.ReconnectString;
+                    reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
+                    ReconnectButton.Content = Reconnector.ReconnectString;
                 }
             }
         }
@@ -80,7 +80,7 @@ namespace HDT_Reconnect
                 lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
                 if (reconnect.Disconnect() == 0)
                 {
-                    ReconnectButton.Content = Reconnect.DisconnectedString;
+                    ReconnectButton.Content = Reconnector.DisconnectedString;
                 }
             }
         }
@@ -110,7 +110,7 @@ namespace HDT_Reconnect
 
         private bool IsAbleToReconnect()
         {
-            return reconnect.Status == Reconnect.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
+            return reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
         }
 
         private bool IsGameReStart()
