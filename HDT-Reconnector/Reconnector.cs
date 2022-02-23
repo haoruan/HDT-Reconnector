@@ -9,9 +9,9 @@ using System.Net;
 
 using Hearthstone_Deck_Tracker.Utility.Logging;
 
-namespace HDT_Reconnect
+namespace HDT_Reconnector
 {
-    public class Reconnect
+    public class Reconnector
     {
         private const string HsName = "Hearthstone";
 
@@ -27,7 +27,7 @@ namespace HDT_Reconnect
             CONNECTED
         }
 
-        public Reconnect()
+        public Reconnector()
         {
             Status = CONNECTION_STATUS.CONNECTED;
         }

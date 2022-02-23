@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Principal;
 
-namespace HDT_Reconnect
+namespace HDT_Reconnector
 {
     internal class Utils
     {

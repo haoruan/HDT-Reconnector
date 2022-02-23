@@ -3,6 +3,7 @@ HDT-Reconnector is a plugin for [Hearthstone Deck Tracker](https://github.com/He
  
 HDT-Reconnector controls Hearthstone's TCP connections to disconnect the game, so it's faster then the firewall rule solution, and it's more suitable for you if you can't control the firewall.
 
+![HDT-Reconnector](images/sample.png?raw=true)
 
 # Installation
 1. Download the latest plugin from [Releases page]()
