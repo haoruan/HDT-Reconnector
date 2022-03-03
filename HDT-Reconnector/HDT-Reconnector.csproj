@@ -87,12 +87,15 @@
   <ItemGroup>
     <Compile Include="Iphlpapi.cs" />
     <Compile Include="Reconnector.cs" />
+    <Compile Include="NativePtrs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReconnectPanel.xaml.cs">
       <DependentUpon>ReconnectPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ReconnectorPlugin.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="Wfp.cs" />
+    <Compile Include="WfpException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="ReconnectPanel.xaml">

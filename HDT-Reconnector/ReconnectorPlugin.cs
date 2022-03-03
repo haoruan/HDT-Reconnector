@@ -9,6 +9,7 @@ using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.API;
 using Hearthstone_Deck_Tracker.Enums;
 using MahApps.Metro.Controls.Dialogs;
+using Hearthstone_Deck_Tracker.Utility.Logging;
 
 namespace HDT_Reconnector
 {
@@ -71,8 +72,15 @@ namespace HDT_Reconnector
 
                 if (reconnectPanel == null)
                 {
-                    reconnectPanel = new ReconnectPanel();
-                    Core.OverlayCanvas.Children.Add(reconnectPanel);
+                    try
+                    {
+                        reconnectPanel = new ReconnectPanel();
+                        Core.OverlayCanvas.Children.Add(reconnectPanel);
+                    }
+                    catch (WfpException ex)
+                    {
+                        Log.Error(ex);
+                    }
                 }
             };
 

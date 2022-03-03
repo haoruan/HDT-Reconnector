@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Net;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace HDT_Reconnector
 {
@@ -62,9 +63,23 @@ namespace HDT_Reconnector
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
             public byte[] remotePort;
         }
+        private static DateTime ToDateTime(FILETIME time)
+        {
+            ulong high = (ulong)time.dwHighDateTime;
+            uint low = (uint)time.dwLowDateTime;
+            long fileTime = (long)((high << 32) + low);
+            try
+            {
+                return DateTime.FromFileTimeUtc(fileTime);
+            }
+            catch
+            {
+                return DateTime.FromFileTimeUtc(0xFFFFFFFF);
+            }
+        }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct MIB_TCPROW_OWNER_PID
+        public struct MIB_TCPROW_OWNER_MODULE
         {
             public uint state;
             public uint localAddr;
@@ -74,6 +89,9 @@ namespace HDT_Reconnector
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
             public byte[] remotePort;
             public uint owningPid;
+            public FILETIME liCreateTimestamp;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            public ulong[] OwningModuleInfo;
 
             public uint ProcessId
             {
@@ -110,14 +128,19 @@ namespace HDT_Reconnector
             {
                 get { return (MIB_TCP_STATE)state; }
             }
+
+            public DateTime CreateTimestamp
+            {
+                get => ToDateTime(liCreateTimestamp);
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct MIB_TCPTABLE_OWNER_PID
+        public struct MIB_TCPTABLE_OWNER_MODULE
         {
             public uint dwNumEntries;
             [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 1)]
-            public MIB_TCPROW_OWNER_PID[] table;
+            public MIB_TCPROW_OWNER_MODULE[] table;
         }
 
         [DllImport("iphlpapi.dll", SetLastError = true)]
@@ -126,9 +149,9 @@ namespace HDT_Reconnector
         [DllImport("iphlpapi.dll", SetLastError = true)]
         public static extern int SetTcpEntry(IntPtr pTcprow);
 
-        public static List<MIB_TCPROW_OWNER_PID> GetAllTCPConnections()
+        public static List<MIB_TCPROW_OWNER_MODULE> GetAllTCPConnections()
         {
-            return GetTCPConnections<MIB_TCPROW_OWNER_PID, MIB_TCPTABLE_OWNER_PID>(AF_INET);
+            return GetTCPConnections<MIB_TCPROW_OWNER_MODULE, MIB_TCPTABLE_OWNER_MODULE>(AF_INET);
         }
 
         private static List<IPR> GetTCPConnections<IPR, IPT>(int ipVersion)//IPR = Row Type, IPT = Table Type
@@ -139,12 +162,12 @@ namespace HDT_Reconnector
             var dwNumEntriesField = typeof(IPT).GetField("dwNumEntries");
 
             // how much memory do we need?
-            GetExtendedTcpTable(IntPtr.Zero, ref buffSize, true, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_PID_ALL);
+            GetExtendedTcpTable(IntPtr.Zero, ref buffSize, false, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_MODULE_ALL);
             IntPtr tcpTablePtr = Marshal.AllocHGlobal(buffSize);
 
             try
             {
-                uint ret = GetExtendedTcpTable(tcpTablePtr, ref buffSize, false, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_PID_ALL);
+                uint ret = GetExtendedTcpTable(tcpTablePtr, ref buffSize, false, ipVersion, TCP_TABLE_CLASS.TCP_TABLE_OWNER_MODULE_ALL);
                 if (ret != 0)
                     return new List<IPR>();
 
@@ -156,7 +179,7 @@ namespace HDT_Reconnector
                 // buffer we will be returning
                 tableRows = new IPR[numEntries];
 
-                IntPtr rowPtr = (IntPtr)((long)tcpTablePtr + 4);
+                IntPtr rowPtr = (IntPtr)((long)tcpTablePtr + Marshal.OffsetOf(typeof(IPT), "table").ToInt64());
                 for (int i = 0; i < numEntries; i++)
                 {
                     IPR tcpRow = (IPR)Marshal.PtrToStructure(rowPtr, typeof(IPR));
@@ -171,5 +194,6 @@ namespace HDT_Reconnector
             }
             return tableRows != null ? tableRows.ToList() : new List<IPR>();
         }
+
     }
 }

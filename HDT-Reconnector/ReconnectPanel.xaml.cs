@@ -70,6 +70,10 @@ namespace HDT_Reconnector
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
                     ReconnectButton.Content = Reconnector.ReconnectString;
                 }
+                else if (IsGameEnd())
+                {
+                    reconnect.ResumeConnect();
+                }
             }
         }
 
