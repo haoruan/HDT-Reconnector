@@ -77,7 +77,7 @@ namespace HDT_Reconnector
             uint addr = 0;
             ushort port = 0;
             var connCreatedTime = DateTime.MinValue;
-            int foundIP = 0;
+            var foundIP = 0;
 
             Process[] hsProcesses = GetHsProcess();
             List<Iphlpapi.MIB_TCPROW_OWNER_MODULE> tcprows = Iphlpapi.GetAllTCPConnections();

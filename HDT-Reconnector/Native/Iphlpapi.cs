@@ -63,20 +63,6 @@ namespace HDT_Reconnector
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
             public byte[] remotePort;
         }
-        private static DateTime ToDateTime(FILETIME time)
-        {
-            ulong high = (ulong)time.dwHighDateTime;
-            uint low = (uint)time.dwLowDateTime;
-            long fileTime = (long)((high << 32) + low);
-            try
-            {
-                return DateTime.FromFileTimeUtc(fileTime);
-            }
-            catch
-            {
-                return DateTime.FromFileTimeUtc(0xFFFFFFFF);
-            }
-        }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct MIB_TCPROW_OWNER_MODULE
@@ -131,7 +117,7 @@ namespace HDT_Reconnector
 
             public DateTime CreateTimestamp
             {
-                get => ToDateTime(liCreateTimestamp);
+                get => Utils.ToDateTime(liCreateTimestamp);
             }
         }
 

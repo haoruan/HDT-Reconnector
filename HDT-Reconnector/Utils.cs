@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Principal;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace HDT_Reconnector
 {
@@ -20,6 +21,21 @@ namespace HDT_Reconnector
             }
 
             return isElevated;
+        }
+
+        public static DateTime ToDateTime(FILETIME time)
+        {
+            ulong high = (ulong)time.dwHighDateTime;
+            uint low = (uint)time.dwLowDateTime;
+            long fileTime = (long)((high << 32) + low);
+            try
+            {
+                return DateTime.FromFileTimeUtc(fileTime);
+            }
+            catch
+            {
+                return DateTime.FromFileTimeUtc(0xFFFFFFFF);
+            }
         }
     }
 }
