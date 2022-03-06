@@ -98,8 +98,6 @@
     </Compile>
     <Compile Include="ReconnectorPlugin.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="Native\Wfp.cs" />
-    <Compile Include="Native\WfpException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="ReconnectPanel.xaml">
