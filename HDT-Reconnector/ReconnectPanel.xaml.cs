@@ -27,6 +27,7 @@ namespace HDT_Reconnector
     public partial class ReconnectPanel : UserControl
     {
         private Reconnector reconnect;
+        private DateTime lastGameStartTime;
         private const string logSearchPattern = "hearthstone*.log";
         private double oriWidth;
         private double oriHeight;
@@ -34,9 +35,8 @@ namespace HDT_Reconnector
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
 
-        public uint RemoteAddr { get; set; } = 0;
+        public string RemoteAddr { get; set; } = null;
         public ushort RemotePort { get; set; } = 0;
-        public bool IsGameDisconnected { get; set; } = false;
 
         public ReconnectPanel()
         {
@@ -76,7 +76,7 @@ namespace HDT_Reconnector
 
             if (reconnect.Status == Reconnector.CONNECTION_STATUS.DISCONNECTED)
             {
-                if (IsGameDisconnected || IsGameEnd())
+                if (IsGameReStart() || IsGameEnd())
                 {
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
                     ReconnectButton.Content = Reconnector.ReconnectString;
@@ -115,7 +115,7 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
-                IsGameDisconnected = false;
+                lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
                 if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                 {
                     ReconnectButton.Content = Reconnector.DisconnectedString;
@@ -148,7 +148,12 @@ namespace HDT_Reconnector
 
         private bool IsAbleToReconnect()
         {
-            return RemoteAddr != 0 && RemotePort != 0 && reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
+            return RemoteAddr != null && RemotePort != 0 && reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
+        }
+
+        private bool IsGameReStart()
+        {
+            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
         }
 
         private bool IsGameEnd()

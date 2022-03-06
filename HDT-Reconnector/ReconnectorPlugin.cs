@@ -25,7 +25,7 @@ namespace HDT_Reconnector
 
         public string Author => "Hypervisor";
 
-        public Version Version => Version.Parse("1.1.0");
+        public Version Version => Version.Parse("1.1.1");
 
         public MenuItem MenuItem { get; private set; }
 
@@ -83,15 +83,8 @@ namespace HDT_Reconnector
 
                 if (reconnectPanel == null)
                 {
-                    try
-                    {
-                        reconnectPanel = new ReconnectPanel();
-                        Core.OverlayCanvas.Children.Add(reconnectPanel);
-                    }
-                    catch (WfpException ex)
-                    {
-                        Log.Error(ex);
-                    }
+                    reconnectPanel = new ReconnectPanel();
+                    Core.OverlayCanvas.Children.Add(reconnectPanel);
                 }
             };
 
