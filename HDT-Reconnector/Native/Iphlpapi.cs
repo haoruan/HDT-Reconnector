@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Net;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
-namespace HDT_Reconnector
+namespace HDT_Reconnector.Native
 {
     class Iphlpapi
     {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Principal;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+using System.Net;
 
 namespace HDT_Reconnector
 {
@@ -36,6 +37,20 @@ namespace HDT_Reconnector
             {
                 return DateTime.FromFileTimeUtc(0xFFFFFFFF);
             }
+        }
+
+        public static uint ConvertFromIpAddressToInteger(string ipAddress)
+        {
+            var address = IPAddress.Parse(ipAddress);
+            byte[] bytes = address.GetAddressBytes();
+
+            // flip big-endian(network order) to little-endian
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
+
+            return BitConverter.ToUInt32(bytes, 0);
         }
     }
 }

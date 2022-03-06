@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.API;
-using Hearthstone_Deck_Tracker.Enums;
 using MahApps.Metro.Controls.Dialogs;
 using Hearthstone_Deck_Tracker.Utility.Logging;
+
+using HDT_Reconnector.LogHandler;
+using HDT_Reconnector.Native;
 
 namespace HDT_Reconnector
 {
@@ -48,7 +50,16 @@ namespace HDT_Reconnector
         {
             if (reconnectPanel != null)
             {
-                reconnectPanel.OnUpdate();
+                try
+                {
+                    reconnectPanel.OnUpdate();
+                }
+                catch (LogException ex)
+                {
+                    MenuItem.IsChecked = false;
+                    Log.Error(ex);
+                }
+
             }
         }
 

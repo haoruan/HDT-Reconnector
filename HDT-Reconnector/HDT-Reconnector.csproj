@@ -7,7 +7,7 @@
     <ProjectGuid>{C1D0A8F2-1E82-43C7-BF4A-D3CA67C8B551}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HDT_Reconnect</RootNamespace>
+    <RootNamespace>HDT_Reconnector</RootNamespace>
     <AssemblyName>HDT-Reconnector</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -85,6 +85,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogHanlder\ConnectionLogHandler.cs" />
+    <Compile Include="LogHanlder\LogWatcher.cs" />
+    <Compile Include="LogHanlder\LogException.cs" />
+    <Compile Include="LogHanlder\LogReader.cs" />
     <Compile Include="Native\Iphlpapi.cs" />
     <Compile Include="Reconnector.cs" />
     <Compile Include="Native\NativePtrs.cs" />

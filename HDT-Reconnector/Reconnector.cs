@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Net;
 
+using HDT_Reconnector.Native;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 
 namespace HDT_Reconnector
@@ -28,7 +29,6 @@ namespace HDT_Reconnector
 
         private const string filterName = "Port filter";
         private Guid filterKey = new Guid("25a10c5b-883c-498c-ab21-946ea39d169c");
-
         private IntPtr engine = IntPtr.Zero;
 
         public CONNECTION_STATUS Status { get; set; } = CONNECTION_STATUS.CONNECTED;
@@ -57,64 +57,15 @@ namespace HDT_Reconnector
 
         public void ResumeConnect()
         {
+            Log.Info("Reconnecting...");
             DeleteFilter();
         }
 
-        public uint Disconnect()
+        public uint Disconnect(uint addr, ushort port)
         {
-            var(addr, port) = GetReconnectTcp();
-
-            return addr != 0 ? AddWfpFilter(addr, port) : 1;
-        }
-
-        private Process[] GetHsProcess()
-        {
-            return Process.GetProcessesByName(hsName);
-        }
-
-        private (uint, ushort) GetReconnectTcp()
-        {
-            uint addr = 0;
-            ushort port = 0;
-            var connCreatedTime = DateTime.MinValue;
-            var foundIP = 0;
-
-            Process[] hsProcesses = GetHsProcess();
-            List<Iphlpapi.MIB_TCPROW_OWNER_MODULE> tcprows = Iphlpapi.GetAllTCPConnections();
-
-            HashSet<uint> hsPids = new HashSet<uint>();
-
-            foreach (Process hsProcess in hsProcesses)
-            {
-                hsPids.Add((uint)hsProcess.Id);
-            }
-
-            for (int i = tcprows.Count - 1; i >= 0; i--)
-            {
-                if (hsPids.Contains(tcprows[i].ProcessId))
-                {
-                    var remotePort = tcprows[i].RemotePort;
-                    var remoteAddr = tcprows[i].RemoteAddress;
-                    if (!IPAddress.IsLoopback(remoteAddr) && !remoteAddr.Equals(IPAddress.Parse("0.0.0.0")) && remotePort != 443)
-                    {
-                        // If we're able to performe reconnection, the game has at least two non 443 TCP connections
-                        foundIP++;
-
-                        var createTimestamp = tcprows[i].CreateTimestamp;
-
-                        if (createTimestamp.CompareTo(connCreatedTime) > 0)
-                        {
-                            addr = tcprows[i].remoteAddr;
-                            port = (ushort)remotePort;
-                            connCreatedTime = createTimestamp;
-
-                            Log.Info(String.Format("TCP connection: {0}-{1}", remoteAddr, remotePort));
-                        }
-                    }
-                }
-            }
-
-            return foundIP >= 2 ? ((uint)IPAddress.NetworkToHostOrder((int)addr), port) : (0, 0);
+            Log.Info("Disconnecting...");
+            Status = CONNECTION_STATUS.DISCONNECTED;
+            return AddWfpFilter(addr, port);
         }
 
         private uint InstallWfp()
@@ -196,14 +147,14 @@ namespace HDT_Reconnector
             DeleteFilter();
 
             result = Wfp.FwpmSubLayerDeleteByKey0(engine, ref subLayerKey);
-            if (result != (uint)Wfp.FWP_E.SUBLAYER_NOT_FOUND)
+            if (result != (uint)Wfp.FWP_E.SUCCESS && result != (uint)Wfp.FWP_E.SUBLAYER_NOT_FOUND)
             {
                 Log.Error(String.Format("{0} failed with {1}", nameof(Wfp.FwpmSubLayerDeleteByKey0), result));
                 goto Cleanup;
             }
 
             result = Wfp.FwpmProviderDeleteByKey0(engine, ref providerKey);
-            if (result != (uint)Wfp.FWP_E.PROVIDER_NOT_FOUND)
+            if (result != (uint)Wfp.FWP_E.SUCCESS && result != (uint)Wfp.FWP_E.PROVIDER_NOT_FOUND)
             {
                 Log.Error(String.Format("{0} failed with {1}", nameof(Wfp.FwpmProviderDeleteByKey0), result));
                 goto Cleanup;
@@ -223,7 +174,6 @@ namespace HDT_Reconnector
         private uint AddWfpFilter(uint addr, ushort port)
         {
             var ptrs = new NativePtrs();
-
             var conds = new Wfp.FWPM_FILTER_CONDITION0[3];
 
             conds[0].matchType = Wfp.FWP_MATCH.EQUAL;
@@ -274,7 +224,7 @@ namespace HDT_Reconnector
         private void DeleteFilter()
         {
             var result = Wfp.FwpmFilterDeleteByKey0(engine, ref filterKey);
-            if (result != (uint)Wfp.FWP_E.SUCCESS)
+            if (result != (uint)Wfp.FWP_E.SUCCESS && result != (uint)Wfp.FWP_E.FILTER_NOT_FOUND)
             {
                 Log.Error(String.Format("{0} failed with {1}", nameof(Wfp.FwpmFilterDeleteByKey0), result));
             }

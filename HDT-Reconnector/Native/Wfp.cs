@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace HDT_Reconnector
+namespace HDT_Reconnector.Native
 {
     internal class Wfp
     {

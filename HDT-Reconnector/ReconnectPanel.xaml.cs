@@ -11,14 +11,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.IO;
 
-using System.Windows.Controls.Primitives;
+using Config = Hearthstone_Deck_Tracker.Config;
 using Hearthstone_Deck_Tracker.API;
 using Hearthstone_Deck_Tracker.Utility.Extensions;
-using System.Windows.Media.Animation;
-using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Utility.Logging;
+using HDT_Reconnector.LogHandler;
 
 namespace HDT_Reconnector
 {
@@ -28,11 +27,16 @@ namespace HDT_Reconnector
     public partial class ReconnectPanel : UserControl
     {
         private Reconnector reconnect;
-        private DateTime lastGameStartTime;
+        private const string logSearchPattern = "hearthstone*.log";
         private double oriWidth;
         private double oriHeight;
         private double oriFontSize;
         private Brush oriBrush;
+        private LogWatcher connectionLogWatcher = null;
+
+        public uint RemoteAddr { get; set; } = 0;
+        public ushort RemotePort { get; set; } = 0;
+        public bool IsGameDisconnected { get; set; } = false;
 
         public ReconnectPanel()
         {
@@ -52,6 +56,13 @@ namespace HDT_Reconnector
                 UpdatePosition();
             }));
         }
+
+        ~ReconnectPanel()
+        {
+            reconnect = null;
+            connectionLogWatcher = null;
+        }
+
         public void OnUpdate()
         {
             if (Visibility != Visibility.Visible && !Core.Game.IsInMenu)
@@ -65,15 +76,38 @@ namespace HDT_Reconnector
 
             if (reconnect.Status == Reconnector.CONNECTION_STATUS.DISCONNECTED)
             {
-                if (IsGameReStart())
+                if (IsGameDisconnected || IsGameEnd())
                 {
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
                     ReconnectButton.Content = Reconnector.ReconnectString;
-                }
-                else if (IsGameEnd())
-                {
                     reconnect.ResumeConnect();
                 }
+            }
+
+            // When game starts, Hearthstone generates a new log file hearthstone_yy_mm_dd_hh_mm_ss.log
+            // So clear the Watcher on game exiting, and create the Watcher on game starting
+            // We may miss the network disconnected log If the game exits during disconnecting,
+            // but it won't be a matter since we always restore the connection on game end.
+            if (Core.Game.IsRunning && connectionLogWatcher == null)
+            {
+                var logDirectory = Path.Combine(Config.Instance.HearthstoneDirectory, Config.Instance.HearthstoneLogsDirectoryName);
+                var folder = new DirectoryInfo(logDirectory);
+                var logFiles = folder.GetFiles(logSearchPattern).OrderByDescending(f => f.CreationTime).ToList();
+
+                if (logFiles.Count == 0)
+                {
+                    throw new LogException(String.Format("Can't find any {0} in {1}", logSearchPattern, logDirectory));
+                }
+
+                Log.Info(String.Format("Find {0}", logFiles[0].FullName));
+
+                connectionLogWatcher = new LogWatcher(this, logFiles[0].FullName);
+                connectionLogWatcher.Start();
+            }
+
+            if (!Core.Game.IsRunning && connectionLogWatcher != null)
+            {
+                connectionLogWatcher = null;
             }
         }
 
@@ -81,8 +115,8 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
-                lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
-                if (reconnect.Disconnect() == 0)
+                IsGameDisconnected = false;
+                if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                 {
                     ReconnectButton.Content = Reconnector.DisconnectedString;
                 }
@@ -114,13 +148,9 @@ namespace HDT_Reconnector
 
         private bool IsAbleToReconnect()
         {
-            return reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
+            return RemoteAddr != 0 && RemotePort != 0 && reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
         }
 
-        private bool IsGameReStart()
-        {
-            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
-        }
         private bool IsGameEnd()
         {
             return Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
