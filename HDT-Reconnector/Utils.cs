@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Security.Principal;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using System.Net;
+using System.Reflection;
+
+using Hearthstone_Deck_Tracker.Utility.Logging;
 
 namespace HDT_Reconnector
 {
@@ -51,6 +54,20 @@ namespace HDT_Reconnector
             }
 
             return BitConverter.ToUInt32(bytes, 0);
+        }
+
+        public static object GetFieldValue(object obj, string name) {
+            // Set the flags so that private and public fields from instances will be found
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var field = obj.GetType().GetField(name, bindingFlags);
+            return field?.GetValue(obj);
+        }
+
+        public static void SetFieldValue(object obj, string name, object value) {
+            // Set the flags so that private and public fields from instances will be found
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var field = obj.GetType().GetField(name, bindingFlags);
+            field?.SetValue(obj, value);
         }
     }
 }

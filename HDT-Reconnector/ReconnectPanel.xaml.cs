@@ -15,9 +15,12 @@ using System.IO;
 
 using Config = Hearthstone_Deck_Tracker.Config;
 using Hearthstone_Deck_Tracker.API;
+using Hearthstone_Deck_Tracker.Hearthstone;
+using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Utility.Extensions;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using HDT_Reconnector.LogHandler;
+using System.Reflection;
 
 namespace HDT_Reconnector
 {
@@ -34,6 +37,8 @@ namespace HDT_Reconnector
         private double oriFontSize;
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
+        private Dictionary<string, BoardSnapshot> lastKnownBoardState;
+        private object battlegroundsBoardState = null;
 
         public string RemoteAddr { get; set; } = null;
         public ushort RemotePort { get; set; } = 0;
@@ -81,6 +86,7 @@ namespace HDT_Reconnector
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
                     ReconnectButton.Content = Reconnector.ReconnectString;
                     reconnect.ResumeConnect();
+                    RestoreBoardStat();
                 }
             }
 
@@ -103,6 +109,8 @@ namespace HDT_Reconnector
 
                 connectionLogWatcher = new LogWatcher(this, logFiles[0].FullName);
                 connectionLogWatcher.Start();
+
+                SaveBoardStat();
             }
 
             if (!Core.Game.IsRunning && connectionLogWatcher != null)
@@ -115,6 +123,7 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
+                SaveBoardStat();
                 lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
                 if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                 {
@@ -153,12 +162,40 @@ namespace HDT_Reconnector
 
         private bool IsGameReStart()
         {
-            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
+            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime && Core.Game.CurrentGameMode != GameMode.None;
         }
 
         private bool IsGameEnd()
         {
             return Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
+        }
+
+        private void SaveBoardStat()
+        {
+            // if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
+            // {
+            //     return;
+            // }
+
+            battlegroundsBoardState = Utils.GetFieldValue(Core.Game, "_battlegroundsBoardState");
+            // Setting read-only automatically-implemented properties can be done through it's backing field
+            var obj = (Dictionary<string, BoardSnapshot>)Utils.GetFieldValue(battlegroundsBoardState, "<LastKnownBoardState>k__BackingField");
+            lastKnownBoardState = obj.ToDictionary(entry => entry.Key, entry => entry.Value);
+            Log.Info(ObjectDumper.Dump(lastKnownBoardState));
+        }
+
+        private void RestoreBoardStat()
+        {
+            // if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
+            // {
+            //     return;
+            // }
+            if (battlegroundsBoardState != null)
+            {
+                Utils.SetFieldValue(battlegroundsBoardState, "<LastKnownBoardState>k__BackingField", lastKnownBoardState);
+            }
+
+            SaveBoardStat();
         }
     }
 }

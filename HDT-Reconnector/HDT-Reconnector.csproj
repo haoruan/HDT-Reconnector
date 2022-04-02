@@ -90,6 +90,7 @@
     <Compile Include="LogHanlder\LogException.cs" />
     <Compile Include="LogHanlder\LogReader.cs" />
     <Compile Include="Native\Iphlpapi.cs" />
+    <Compile Include="ObjectDump.cs" />
     <Compile Include="Reconnector.cs" />
     <Compile Include="Native\NativePtrs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -106,6 +107,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
