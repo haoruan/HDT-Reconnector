@@ -25,7 +25,7 @@ namespace HDT_Reconnector
 
         public string Author => "Hypervisor";
 
-        public Version Version => Version.Parse("1.1.1");
+        public Version Version => Version.Parse("1.2.0");
 
         public MenuItem MenuItem { get; private set; }
 

@@ -8,7 +8,7 @@ using Hearthstone_Deck_Tracker.Utility.Logging;
 
 namespace HDT_Reconnector.LogHandler
 {
-    internal class LogWatcher : IDisposable
+    internal class LogWatcher
     {
         internal const int UpdateDelay = 200;
         private readonly ConnectionLogHandler connectionLogHandler = new ConnectionLogHandler();
@@ -25,7 +25,7 @@ namespace HDT_Reconnector.LogHandler
             logReaders.Add(connectionLogReader);
         }
 
-        public void Dispose()
+        public void Stop()
         {
             foreach (var logReader in logReaders)
             {
