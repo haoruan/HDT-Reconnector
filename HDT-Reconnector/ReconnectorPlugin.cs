@@ -90,7 +90,7 @@ namespace HDT_Reconnector
 
             MenuItem.Unchecked += (sender, args) =>
             {
-                if (reconnectPanel != null)
+                using (reconnectPanel)
                 {
                     Core.OverlayCanvas.Children.Remove(reconnectPanel);
                     reconnectPanel = null;

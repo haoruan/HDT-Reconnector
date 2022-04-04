@@ -27,7 +27,7 @@ namespace HDT_Reconnector
     /// <summary>
     /// Interaction logic for ReconnectPanel.xaml
     /// </summary>
-    public partial class ReconnectPanel : UserControl
+    public partial class ReconnectPanel : UserControl, IDisposable
     {
         private Reconnector reconnect;
         private DateTime lastGameStartTime;
@@ -37,8 +37,9 @@ namespace HDT_Reconnector
         private double oriFontSize;
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
-        private Dictionary<string, BoardSnapshot> lastKnownBoardState;
+        private Dictionary<string, BoardSnapshot> lastKnownBoardState = new Dictionary<string, BoardSnapshot>();
         private object battlegroundsBoardState = null;
+        private RoutedEventHandler updatePositionHandler;
 
         public string RemoteAddr { get; set; } = null;
         public ushort RemotePort { get; set; } = 0;
@@ -56,16 +57,23 @@ namespace HDT_Reconnector
             OverlayExtensions.SetIsOverlayHitTestVisible(this, true);
 
             UpdatePosition();
-            Core.OverlayCanvas.AddHandler(SizeChangedEvent, new RoutedEventHandler((sender, e) =>
+            updatePositionHandler = new RoutedEventHandler((sender, e) =>
             {
                 UpdatePosition();
-            }));
+            });
+
+            Core.OverlayCanvas.AddHandler(SizeChangedEvent, updatePositionHandler);
         }
 
-        ~ReconnectPanel()
+        public void Dispose()
         {
+            Core.OverlayCanvas.RemoveHandler(SizeChangedEvent, updatePositionHandler);
             reconnect = null;
-            connectionLogWatcher = null;
+
+            using (connectionLogWatcher)
+            {
+                connectionLogWatcher = null;
+            }
         }
 
         public void OnUpdate()
@@ -109,13 +117,14 @@ namespace HDT_Reconnector
 
                 connectionLogWatcher = new LogWatcher(this, logFiles[0].FullName);
                 connectionLogWatcher.Start();
-
-                SaveBoardStat();
             }
 
             if (!Core.Game.IsRunning && connectionLogWatcher != null)
             {
-                connectionLogWatcher = null;
+                using (connectionLogWatcher)
+                {
+                    connectionLogWatcher = null;
+                }
             }
         }
 
@@ -172,30 +181,29 @@ namespace HDT_Reconnector
 
         private void SaveBoardStat()
         {
-            // if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
-            // {
-            //     return;
-            // }
+            if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
+            {
+                return;
+            }
 
             battlegroundsBoardState = Utils.GetFieldValue(Core.Game, "_battlegroundsBoardState");
             // Setting read-only automatically-implemented properties can be done through it's backing field
             var obj = (Dictionary<string, BoardSnapshot>)Utils.GetFieldValue(battlegroundsBoardState, "<LastKnownBoardState>k__BackingField");
+            // obj is a ref to LastKnownBoardState, so create a shaodow copy here
             lastKnownBoardState = obj.ToDictionary(entry => entry.Key, entry => entry.Value);
-            Log.Info(ObjectDumper.Dump(lastKnownBoardState));
         }
 
         private void RestoreBoardStat()
         {
-            // if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
-            // {
-            //     return;
-            // }
+            if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
+            {
+                return;
+            }
+
             if (battlegroundsBoardState != null)
             {
                 Utils.SetFieldValue(battlegroundsBoardState, "<LastKnownBoardState>k__BackingField", lastKnownBoardState);
             }
-
-            SaveBoardStat();
         }
     }
 }
