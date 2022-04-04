@@ -13,26 +13,23 @@
                   Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatButton.xaml">
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
-            <Storyboard x:Key="StoryboardHover">
-                <DoubleAnimation Duration="0" To="0.8" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="ReconnectButton" d:IsOptimized="True"/>
-            </Storyboard>
-            <Storyboard x:Key="StoryboardNormal">
-                <DoubleAnimation Duration="0" To="0.5" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="ReconnectButton" d:IsOptimized="True"/>
-            </Storyboard>
         </ResourceDictionary>
     </FrameworkElement.Resources>
     <Grid>
-        <Button x:Name="ReconnectButton" Content="Reconnect" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"
+        <Button x:Name="ReconnectButton" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"
                 Height="40"
                 Width="140"
-                Background="#393D3F"
+                Background="#23272a"
                 Foreground="White"
                 BorderBrush="#141617"
                 BorderThickness="2"
                 FontWeight="Bold"
                 Cursor="Hand"
                 Click="ReconnectButton_Click"
-                Style="{StaticResource MetroFlatButton}" FontFamily="Comic Sans MS" FontSize="18" MouseEnter="ReconnectButton_MouseEnter" MouseLeave="ReconnectButton_MouseLeave"
-                />
+                Style="{StaticResource MetroFlatButton}" FontFamily="/HDT-Reconnector;component/Resources/#Chunkfive" MouseEnter="ReconnectButton_MouseEnter" MouseLeave="ReconnectButton_MouseLeave"
+                >
+            <local:OutlinedTextBlock x:Name="ReconnectText" Text="Reconnect"  FontSize="20" />
+        </Button>
+
     </Grid>
 </UserControl>

@@ -95,7 +95,7 @@ namespace HDT_Reconnector
                 if (IsGameReStart() || IsGameEnd())
                 {
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
-                    ReconnectButton.Content = Reconnector.ReconnectString;
+                    ReconnectText.Text = Reconnector.ReconnectString;
                     reconnect.ResumeConnect();
 
                     if (!IsGameEnd())
@@ -155,7 +155,7 @@ namespace HDT_Reconnector
                 {
                     if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                     {
-                        ReconnectButton.Content = Reconnector.DisconnectedString;
+                        ReconnectText.Text = Reconnector.DisconnectedString;
                     }
                 }
             }
@@ -175,7 +175,7 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
-                ReconnectButton.Background = Brushes.Gray;
+                ReconnectButton.Background = new SolidColorBrush(Color.FromRgb(0x2E, 0x34, 0x38));
             }
         }
 
@@ -186,16 +186,18 @@ namespace HDT_Reconnector
 
         private bool IsAbleToReconnect()
         {
-            return RemoteAddr != null && 
-                RemotePort != 0 && 
-                reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && 
-                !IsGameEnd() && 
-                Core.Game.CurrentGameMode != GameMode.None;
+            return RemoteAddr != null &&
+                RemotePort != 0 &&
+                reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED &&
+                Core.Game.CurrentGameMode != GameMode.None &&
+                !IsGameEnd();
         }
 
         private bool IsGameReStart()
         {
-            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime && Core.Game.CurrentGameMode != GameMode.None;
+            return Core.Game.CurrentGameMode != GameMode.None && 
+                Core.Game.CurrentGameStats != null &&
+                Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
         }
 
         private bool IsInMainOrBgMenu()
@@ -205,7 +207,7 @@ namespace HDT_Reconnector
 
         private bool IsGameEnd()
         {
-            return Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
+            return Core.Game.CurrentGameStats != null && Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
         }
 
     }

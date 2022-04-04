@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BattlegroundsBoardStat.cs" />
+    <Compile Include="Controls\OutlinedTextBlock.cs" />
     <Compile Include="LogHanlder\ConnectionLogHandler.cs" />
     <Compile Include="LogHanlder\LogWatcher.cs" />
     <Compile Include="LogHanlder\LogException.cs" />
@@ -109,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Resource Include="Resources\Chunkfive.otf" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
