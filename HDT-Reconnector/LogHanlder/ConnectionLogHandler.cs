@@ -16,8 +16,11 @@ namespace HDT_Reconnector.LogHandler
             var match = GotoGameServer.Match(line);
             if(match.Success)
             {
-                reconnectPanel.RemoteAddr = match.Groups[1].Value.Trim();
-                reconnectPanel.RemotePort = UInt16.Parse(match.Groups[2].Value);
+                lock(reconnectPanel)
+                {
+                    reconnectPanel.RemoteAddr = match.Groups[1].Value.Trim();
+                    reconnectPanel.RemotePort = UInt16.Parse(match.Groups[2].Value);
+                }
             }
         }
     }

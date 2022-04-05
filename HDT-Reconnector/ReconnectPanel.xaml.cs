@@ -15,6 +15,8 @@ using System.IO;
 
 using Config = Hearthstone_Deck_Tracker.Config;
 using Hearthstone_Deck_Tracker.API;
+using Hearthstone_Deck_Tracker.Enums;
+using Hearthstone_Deck_Tracker.Enums.Hearthstone;
 using Hearthstone_Deck_Tracker.Utility.Extensions;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using HDT_Reconnector.LogHandler;
@@ -24,23 +26,25 @@ namespace HDT_Reconnector
     /// <summary>
     /// Interaction logic for ReconnectPanel.xaml
     /// </summary>
-    public partial class ReconnectPanel : UserControl
+    public partial class ReconnectPanel : UserControl, IDisposable
     {
-        private Reconnector reconnect;
+        private Reconnector reconnect = new Reconnector();
         private DateTime lastGameStartTime;
         private const string logSearchPattern = "hearthstone*.log";
         private double oriWidth;
         private double oriHeight;
         private double oriFontSize;
+        private bool hasRunningInit = false;
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
+        private RoutedEventHandler updatePositionHandler;
+        private BattlegroundsBoardStat bgBoardStat = new BattlegroundsBoardStat();
 
         public string RemoteAddr { get; set; } = null;
         public ushort RemotePort { get; set; } = 0;
 
         public ReconnectPanel()
         {
-            reconnect = new Reconnector();
             InitializeComponent();
 
             oriHeight = ReconnectButton.Height;
@@ -51,16 +55,17 @@ namespace HDT_Reconnector
             OverlayExtensions.SetIsOverlayHitTestVisible(this, true);
 
             UpdatePosition();
-            Core.OverlayCanvas.AddHandler(SizeChangedEvent, new RoutedEventHandler((sender, e) =>
+            updatePositionHandler = new RoutedEventHandler((sender, e) =>
             {
                 UpdatePosition();
-            }));
+            });
+            Core.OverlayCanvas.AddHandler(SizeChangedEvent, updatePositionHandler);
         }
 
-        ~ReconnectPanel()
+        public void Dispose()
         {
-            reconnect = null;
-            connectionLogWatcher = null;
+            Core.OverlayCanvas.RemoveHandler(SizeChangedEvent, updatePositionHandler);
+            connectionLogWatcher?.Stop();
         }
 
         public void OnUpdate()
@@ -76,11 +81,27 @@ namespace HDT_Reconnector
 
             if (reconnect.Status == Reconnector.CONNECTION_STATUS.DISCONNECTED)
             {
+                // We will restore the boardstat on every reconnect, including hearthstone restart.
+                // But there is a case that we close the game and can't reconnect, like losing the game,
+                // in this case we will return to main menu or in battlegrounds menu (this func is called every 100ms), 
+                // so we have to reset is reconnect status
+                if (IsInMainOrBgMenu())
+                {
+                    Log.Info("Can't reconnect to the game");
+                    reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
+                    return;
+                }
+
                 if (IsGameReStart() || IsGameEnd())
                 {
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
-                    ReconnectButton.Content = Reconnector.ReconnectString;
+                    ReconnectText.Text = Reconnector.ReconnectString;
                     reconnect.ResumeConnect();
+
+                    if (!IsGameEnd())
+                    {
+                        bgBoardStat.RestoreBoardStat();
+                    }
                 }
             }
 
@@ -88,7 +109,7 @@ namespace HDT_Reconnector
             // So clear the Watcher on game exiting, and create the Watcher on game starting
             // We may miss the network disconnected log If the game exits during disconnecting,
             // but it won't be a matter since we always restore the connection on game end.
-            if (Core.Game.IsRunning && connectionLogWatcher == null)
+            if (Core.Game.IsRunning && !hasRunningInit)
             {
                 var logDirectory = Path.Combine(Config.Instance.HearthstoneDirectory, Config.Instance.HearthstoneLogsDirectoryName);
                 var folder = new DirectoryInfo(logDirectory);
@@ -103,11 +124,24 @@ namespace HDT_Reconnector
 
                 connectionLogWatcher = new LogWatcher(this, logFiles[0].FullName);
                 connectionLogWatcher.Start();
+
+                hasRunningInit = true;
             }
 
-            if (!Core.Game.IsRunning && connectionLogWatcher != null)
+            // Game closing
+            if (!Core.Game.IsRunning && hasRunningInit)
             {
-                connectionLogWatcher = null;
+                connectionLogWatcher.Stop();
+
+                if (IsAbleToReconnect())
+                {
+                    // A simulation of disconnecting when game is closed on any gamemode
+                    bgBoardStat.SaveBoardStat();
+                    lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
+                    reconnect.Status = Reconnector.CONNECTION_STATUS.DISCONNECTED;
+                }
+
+                hasRunningInit = false;
             }
         }
 
@@ -115,10 +149,14 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
+                bgBoardStat.SaveBoardStat();
                 lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
-                if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
+                lock(this)
                 {
-                    ReconnectButton.Content = Reconnector.DisconnectedString;
+                    if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
+                    {
+                        ReconnectText.Text = Reconnector.DisconnectedString;
+                    }
                 }
             }
         }
@@ -137,7 +175,7 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
-                ReconnectButton.Background = Brushes.Gray;
+                ReconnectButton.Background = new SolidColorBrush(Color.FromRgb(0x2E, 0x34, 0x38));
             }
         }
 
@@ -148,17 +186,29 @@ namespace HDT_Reconnector
 
         private bool IsAbleToReconnect()
         {
-            return RemoteAddr != null && RemotePort != 0 && reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED && !IsGameEnd();
+            return RemoteAddr != null &&
+                RemotePort != 0 &&
+                reconnect.Status == Reconnector.CONNECTION_STATUS.CONNECTED &&
+                Core.Game.CurrentGameMode != GameMode.None &&
+                !IsGameEnd();
         }
 
         private bool IsGameReStart()
         {
-            return Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
+            return Core.Game.CurrentGameMode != GameMode.None && 
+                Core.Game.CurrentGameStats != null &&
+                Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
+        }
+
+        private bool IsInMainOrBgMenu()
+        {
+            return Core.Game.CurrentMode == Mode.HUB || Core.Game.CurrentMode == Mode.BACON;
         }
 
         private bool IsGameEnd()
         {
-            return Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
+            return Core.Game.CurrentGameStats != null && Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
         }
+
     }
 }

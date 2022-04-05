@@ -25,12 +25,13 @@ namespace HDT_Reconnector.LogHandler
             logReaders.Add(connectionLogReader);
         }
 
-        ~LogWatcher()
+        public void Stop()
         {
             foreach (var logReader in logReaders)
             {
                 logReader.Stop();
             }
+            logReaders.Clear();
         }
 
         private void ConnectionLogReader_OnNewLine(string obj)
