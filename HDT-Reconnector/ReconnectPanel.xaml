@@ -6,30 +6,20 @@
              xmlns:local="clr-namespace:HDT_Reconnector"
              mc:Ignorable="d" 
              >
-    <FrameworkElement.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary 
-                  Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatButton.xaml">
-                </ResourceDictionary>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </FrameworkElement.Resources>
     <Grid>
-        <Button x:Name="ReconnectButton" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"
-                Height="40"
-                Width="140"
-                Background="#23272a"
-                Foreground="White"
+        <Border x:Name="ReconnectButton"
                 BorderBrush="#141617"
                 BorderThickness="2"
-                FontWeight="Bold"
+                Background="#23272a"
+                Height="40" Width="140"
                 Cursor="Hand"
-                Click="ReconnectButton_Click"
-                Style="{StaticResource MetroFlatButton}" FontFamily="/HDT-Reconnector;component/Resources/#Chunkfive" MouseEnter="ReconnectButton_MouseEnter" MouseLeave="ReconnectButton_MouseLeave"
-                >
-            <local:OutlinedTextBlock x:Name="ReconnectText" Text="Reconnect"  FontSize="20" />
-        </Button>
+                MouseEnter="ReconnectButton_MouseEnter" MouseLeave="ReconnectButton_MouseLeave" MouseDown="ReconnectButton_Click">
+            <local:OutlinedTextBlock x:Name="ReconnectText" 
+                                     Text="Reconnect" 
+                                     TextAlignment="Center"
+                                     FontFamily="/HDT-Reconnector;component/Resources/#Chunkfive"
+                                     FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
 
     </Grid>
 </UserControl>

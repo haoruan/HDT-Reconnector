@@ -18,7 +18,7 @@ HDT-Reconnector controls Hearthstone's TCP connections to disconnect the game, s
 3. Enjoy it!
 
 # Known issues
-After several disconnect and reconnect, the game may crash.
+After several disconnect and reconnect, the game may crash. It's not a plugin issue, but a Hearthstone's bug.
 
 # License
 Released under the Apache 2.0 license.

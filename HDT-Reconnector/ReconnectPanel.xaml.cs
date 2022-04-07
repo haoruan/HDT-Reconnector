@@ -49,7 +49,7 @@ namespace HDT_Reconnector
 
             oriHeight = ReconnectButton.Height;
             oriWidth = ReconnectButton.Width;
-            oriFontSize = ReconnectButton.FontSize;
+            oriFontSize = ReconnectText.FontSize;
             oriBrush = ReconnectButton.Background;
 
             OverlayExtensions.SetIsOverlayHitTestVisible(this, true);
@@ -165,7 +165,7 @@ namespace HDT_Reconnector
         {
             ReconnectButton.Width = oriWidth * Core.OverlayWindow.AutoScaling;
             ReconnectButton.Height = oriHeight * Core.OverlayWindow.AutoScaling;
-            ReconnectButton.FontSize = oriFontSize * Core.OverlayWindow.AutoScaling;
+            ReconnectText.FontSize = oriFontSize * Core.OverlayWindow.AutoScaling;
 
             Canvas.SetBottom(this, Core.OverlayWindow.Height * 10 / 100);
             Canvas.SetRight(this, 0);
