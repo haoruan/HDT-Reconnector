@@ -96,10 +96,12 @@
     <Compile Include="Reconnector.cs" />
     <Compile Include="Native\NativePtrs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReconnectPanel.resize.cs" />
     <Compile Include="ReconnectPanel.xaml.cs">
       <DependentUpon>ReconnectPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ReconnectorPlugin.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

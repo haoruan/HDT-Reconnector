@@ -11,14 +11,15 @@
                 BorderBrush="#141617"
                 BorderThickness="2"
                 Background="#23272a"
-                Height="40" Width="140"
                 Cursor="Hand"
-                MouseEnter="ReconnectButton_MouseEnter" MouseLeave="ReconnectButton_MouseLeave" MouseDown="ReconnectButton_Click">
+                MouseEnter="ReconnectButton_MouseEnter"
+                MouseLeave="ReconnectButton_MouseLeave"
+                MouseDown="ReconnectButton_Click">
             <local:OutlinedTextBlock x:Name="ReconnectText" 
                                      Text="Reconnect" 
                                      TextAlignment="Center"
                                      FontFamily="/HDT-Reconnector;component/Resources/#Chunkfive"
-                                     FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
 
     </Grid>

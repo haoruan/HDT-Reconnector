@@ -13,13 +13,13 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.IO;
 
-using Config = Hearthstone_Deck_Tracker.Config;
-using Hearthstone_Deck_Tracker.API;
+using Core = Hearthstone_Deck_Tracker.API.Core;
+using Hearthstone_Deck_Tracker;
 using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Enums.Hearthstone;
-using Hearthstone_Deck_Tracker.Utility.Extensions;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using HDT_Reconnector.LogHandler;
+using System.Windows.Controls.Primitives;
 
 namespace HDT_Reconnector
 {
@@ -31,9 +31,6 @@ namespace HDT_Reconnector
         private Reconnector reconnect = new Reconnector();
         private DateTime lastGameStartTime;
         private const string logSearchPattern = "hearthstone*.log";
-        private double oriWidth;
-        private double oriHeight;
-        private double oriFontSize;
         private bool hasRunningInit = false;
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
@@ -46,13 +43,15 @@ namespace HDT_Reconnector
         public ReconnectPanel()
         {
             InitializeComponent();
+            Settings.Load();
 
-            oriHeight = ReconnectButton.Height;
-            oriWidth = ReconnectButton.Width;
-            oriFontSize = ReconnectText.FontSize;
             oriBrush = ReconnectButton.Background;
 
-            OverlayExtensions.SetIsOverlayHitTestVisible(this, true);
+            resizeGrip = new ResizeGrip();
+            resizeGrip.MouseDown += ResizeGrip_MouseDown;
+            resizeGrip.MouseMove += ResizeGrip_MouseMove;
+            resizeGrip.MouseUp += ResizeGrip_MouseUp;
+            AddToOverlayWindowPrivate();
 
             UpdatePosition();
             updatePositionHandler = new RoutedEventHandler((sender, e) =>
@@ -64,6 +63,8 @@ namespace HDT_Reconnector
 
         public void Dispose()
         {
+            Settings.Save();
+            RemoveFromOverlayWindowPrivate();
             Core.OverlayCanvas.RemoveHandler(SizeChangedEvent, updatePositionHandler);
             connectionLogWatcher?.Stop();
         }
@@ -111,7 +112,8 @@ namespace HDT_Reconnector
             // but it won't be a matter since we always restore the connection on game end.
             if (Core.Game.IsRunning && !hasRunningInit)
             {
-                var logDirectory = Path.Combine(Config.Instance.HearthstoneDirectory, Config.Instance.HearthstoneLogsDirectoryName);
+                var logDirectory = Path.Combine(Config.Instance.HearthstoneDirectory,
+                    Config.Instance.HearthstoneLogsDirectoryName);
                 var folder = new DirectoryInfo(logDirectory);
                 var logFiles = folder.GetFiles(logSearchPattern).OrderByDescending(f => f.CreationTime).ToList();
 
@@ -151,7 +153,7 @@ namespace HDT_Reconnector
             {
                 bgBoardStat.SaveBoardStat();
                 lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
-                lock(this)
+                lock (this)
                 {
                     if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                     {
@@ -159,16 +161,6 @@ namespace HDT_Reconnector
                     }
                 }
             }
-        }
-
-        private void UpdatePosition()
-        {
-            ReconnectButton.Width = oriWidth * Core.OverlayWindow.AutoScaling;
-            ReconnectButton.Height = oriHeight * Core.OverlayWindow.AutoScaling;
-            ReconnectText.FontSize = oriFontSize * Core.OverlayWindow.AutoScaling;
-
-            Canvas.SetBottom(this, Core.OverlayWindow.Height * 10 / 100);
-            Canvas.SetRight(this, 0);
         }
 
         private void ReconnectButton_MouseEnter(object sender, MouseEventArgs e)
@@ -195,7 +187,7 @@ namespace HDT_Reconnector
 
         private bool IsGameReStart()
         {
-            return Core.Game.CurrentGameMode != GameMode.None && 
+            return Core.Game.CurrentGameMode != GameMode.None &&
                 Core.Game.CurrentGameStats != null &&
                 Core.Game.CurrentGameStats.StartTime > lastGameStartTime;
         }
@@ -207,8 +199,8 @@ namespace HDT_Reconnector
 
         private bool IsGameEnd()
         {
-            return Core.Game.CurrentGameStats != null && Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
+            return Core.Game.CurrentGameStats != null &&
+                Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
         }
-
     }
 }
