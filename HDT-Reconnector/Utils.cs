@@ -9,11 +9,13 @@ using System.Net;
 using System.Reflection;
 
 using Hearthstone_Deck_Tracker.Utility.Logging;
+using System.Windows;
 
 namespace HDT_Reconnector
 {
     internal class Utils
     {
+        public static readonly Point Resolution = new Point(1920, 1080);
         public static bool IsElevated()
         {
             bool isElevated;
@@ -69,5 +71,8 @@ namespace HDT_Reconnector
             var field = obj.GetType().GetField(name, bindingFlags);
             field?.SetValue(obj, value);
         }
+
+        public static bool PointInsideControl(Point pos, double actualWidth, double actualHeight, Thickness margin)
+			=> pos.X > 0 - margin.Left && pos.X < actualWidth + margin.Right && (pos.Y > 0 - margin.Top && pos.Y < actualHeight + margin.Bottom);
     }
 }
