@@ -17,6 +17,9 @@ HDT-Reconnector controls Hearthstone's TCP connections to disconnect the game, s
 2. In game, when you need to disconnect the game, just click the Reconnect button.
 3. Enjoy it!
 
+# Settings
+1. Move/Resize button - Unlock the ui in `Options -> Overlay -> General -> Unlock Overlay`. Sometimes HDT doesn't show the unlock ui properly and you're unable to move the button, in this case just lock and unlock it.
+
 # Known issues
 After several disconnect and reconnect, the game may crash. It's not a plugin issue, but a Hearthstone's bug.
 
