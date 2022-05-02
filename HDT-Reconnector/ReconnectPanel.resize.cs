@@ -60,7 +60,6 @@ namespace HDT_Reconnector
 
         private void ResizeGrip_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Log.Info("ResizeGrip_MouseDown");
             resizeGrip.CaptureMouse();
             lmbDown = true;
             var pos = User32.GetMousePos();

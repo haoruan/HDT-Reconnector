@@ -20,6 +20,7 @@ using Hearthstone_Deck_Tracker.Enums.Hearthstone;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using HDT_Reconnector.LogHandler;
 using System.Windows.Controls.Primitives;
+using Hearthstone_Deck_Tracker.Utility.Extensions;
 
 namespace HDT_Reconnector
 {
@@ -45,12 +46,16 @@ namespace HDT_Reconnector
             InitializeComponent();
             Settings.Load();
 
+            Visibility = Visibility.Collapsed;
             oriBrush = ReconnectButton.Background;
 
             resizeGrip = new ResizeGrip();
             resizeGrip.MouseDown += ResizeGrip_MouseDown;
             resizeGrip.MouseMove += ResizeGrip_MouseMove;
             resizeGrip.MouseUp += ResizeGrip_MouseUp;
+            resizeGrip.Visibility = Visibility.Collapsed;
+            OverlayExtensions.SetIsOverlayHitTestVisible(resizeGrip, true);
+
             AddToOverlayWindowPrivate();
 
             UpdatePosition();
@@ -71,14 +76,10 @@ namespace HDT_Reconnector
 
         public void OnUpdate()
         {
-            if (Visibility != Visibility.Visible && !Core.Game.IsInMenu)
-            {
-                Visibility = Visibility.Visible;
-            }
-            else if (Visibility != Visibility.Hidden && Core.Game.IsInMenu)
-            {
-                Visibility = Visibility.Hidden;
-            }
+            // Show reconnect button:
+            // 1. When we want to resize to move it in menu
+            // 2. When we're in the match
+            Visibility = Core.Game.IsInMenu? resizeGrip.Visibility : Visibility.Visible;
 
             if (reconnect.Status == Reconnector.CONNECTION_STATUS.DISCONNECTED)
             {
