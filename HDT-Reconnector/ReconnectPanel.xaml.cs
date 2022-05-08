@@ -97,7 +97,7 @@ namespace HDT_Reconnector
                 if (IsGameReStart() || IsGameEnd())
                 {
                     reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
-                    ReconnectText.Text = Reconnector.ReconnectString;
+                    ReconnectText.Text = Utils.GetLoc("Text_Reconnect");
                     reconnect.ResumeConnect();
 
                     if (!IsGameEnd())
@@ -158,7 +158,7 @@ namespace HDT_Reconnector
                 {
                     if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                     {
-                        ReconnectText.Text = Reconnector.DisconnectedString;
+                        ReconnectText.Text = Utils.GetLoc("Text_Disconnected");
                     }
                 }
             }

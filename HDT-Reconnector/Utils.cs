@@ -10,12 +10,14 @@ using System.Reflection;
 
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using System.Windows;
+using WPFLocalizeExtension.Engine;
 
 namespace HDT_Reconnector
 {
     internal class Utils
     {
         public static readonly Point Resolution = new Point(1920, 1080);
+        private static readonly Dictionary<string, string> Cache = new Dictionary<string, string>();
         public static bool IsElevated()
         {
             bool isElevated;
@@ -28,6 +30,20 @@ namespace HDT_Reconnector
 
             return isElevated;
         }
+
+        public static string GetLoc(string key, bool upper = false)
+		{
+			var culture = LocalizeDictionary.Instance.Culture;
+			var cacheKey = culture + key;
+			if(!Cache.TryGetValue(cacheKey, out var str))
+			{
+				str = LocalizeDictionary.Instance.GetLocalizedObject("HDT-Reconnector", "Strings", key, culture)?.ToString();
+				Cache[cacheKey] = str;
+			}
+			if(str == null)
+				return string.Empty;
+			return upper ? str.ToUpper(culture) : str;
+		}
 
         public static DateTime ToDateTime(FILETIME time)
         {

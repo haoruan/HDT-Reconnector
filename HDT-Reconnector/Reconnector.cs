@@ -16,9 +16,6 @@ namespace HDT_Reconnector
     {
         private const string hsName = "Hearthstone";
 
-        public const string ReconnectString = "Reconnect";
-        public const string DisconnectedString = "Disconnected";
-
         public CONNECTION_STATUS Status { get; set; } = CONNECTION_STATUS.CONNECTED;
 
         public enum CONNECTION_STATUS
