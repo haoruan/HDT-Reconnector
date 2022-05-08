@@ -4,6 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HDT_Reconnector"
+             xmlns:lex="http://wpflocalizeextension.codeplex.com"
+             lex:LocalizeDictionary.DesignCulture="en"
+             lex:ResxLocalizationProvider.DefaultAssembly="HDT-Reconnector"
+             lex:ResxLocalizationProvider.DefaultDictionary="Strings"
              mc:Ignorable="d" 
              >
     <Grid>
@@ -16,7 +20,7 @@
                 MouseLeave="ReconnectButton_MouseLeave"
                 MouseDown="ReconnectButton_Click">
             <local:OutlinedTextBlock x:Name="ReconnectText" 
-                                     Text="Reconnect" 
+                                     Text="{lex:Loc Text_Reconnect}" 
                                      TextAlignment="Center"
                                      FontFamily="/HDT-Reconnector;component/Resources/#Chunkfive"
                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>

@@ -7,7 +7,7 @@ HDT-Reconnector controls Hearthstone's TCP connections to disconnect the game, s
 
 # Installation
 1. Download the latest plugin from [Releases page](https://github.com/haoruan/HDT-Reconnector/releases)
-2. Put the dll in `%AppData%/HearthstoneDeckTracker/Plugins`,  you can click the following button in the Hearthstone Deck Tracker options menu to open the folder: `Options -> Tracker -> Plugins -> Plugins Folder`
+2. Unzip and put the dll and localization folders in `%AppData%/HearthstoneDeckTracker/Plugins`,  you can click the following button in the Hearthstone Deck Tracker options menu to open the folder: `Options -> Tracker -> Plugins -> Plugins Folder`
 3. Restart HDT with administrator privileges
 4. Enable the plugin in `Options -> Tracker -> Plugins`.
 
@@ -19,6 +19,10 @@ HDT-Reconnector controls Hearthstone's TCP connections to disconnect the game, s
 
 # Settings
 1. Move/Resize button - Unlock the ui in `Options -> Overlay -> General -> Unlock Overlay`. Sometimes HDT doesn't show the unlock ui properly and you're unable to move the button, in this case just lock and unlock it.
+
+# Localization 
+- English
+- Chinese
 
 # Known issues
 After several disconnect and reconnect, the game may crash. It's not a plugin issue, but a Hearthstone's bug.
