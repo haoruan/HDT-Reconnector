@@ -20,7 +20,6 @@ using Hearthstone_Deck_Tracker.Enums.Hearthstone;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using HDT_Reconnector.LogHandler;
 using System.Windows.Controls.Primitives;
-using Hearthstone_Deck_Tracker.Utility.Extensions;
 
 namespace HDT_Reconnector
 {
@@ -36,6 +35,7 @@ namespace HDT_Reconnector
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
         private RoutedEventHandler updatePositionHandler;
+        private Resize resize;
         private BattlegroundsBoardStat bgBoardStat = new BattlegroundsBoardStat();
 
         public string RemoteAddr { get; set; } = null;
@@ -46,30 +46,26 @@ namespace HDT_Reconnector
             InitializeComponent();
             Settings.Load();
 
+            resize = new Resize(this, ReconnectButton, ReconnectText, Settings.Instance.reconnect);
+
             Visibility = Visibility.Collapsed;
             oriBrush = ReconnectButton.Background;
 
-            resizeGrip = new ResizeGrip();
-            resizeGrip.MouseDown += ResizeGrip_MouseDown;
-            resizeGrip.MouseMove += ResizeGrip_MouseMove;
-            resizeGrip.MouseUp += ResizeGrip_MouseUp;
-            resizeGrip.Visibility = Visibility.Collapsed;
-            OverlayExtensions.SetIsOverlayHitTestVisible(resizeGrip, true);
+            resize.AddToOverlayWindowPrivate();
+            resize.UpdatePosition();
 
-            AddToOverlayWindowPrivate();
-
-            UpdatePosition();
             updatePositionHandler = new RoutedEventHandler((sender, e) =>
             {
-                UpdatePosition();
+                resize.UpdatePosition();
             });
             Core.OverlayCanvas.AddHandler(SizeChangedEvent, updatePositionHandler);
         }
 
         public void Dispose()
         {
+            Settings.Instance.reconnect = resize.settings;
             Settings.Save();
-            RemoveFromOverlayWindowPrivate();
+            resize.RemoveFromOverlayWindowPrivate();
             Core.OverlayCanvas.RemoveHandler(SizeChangedEvent, updatePositionHandler);
             connectionLogWatcher?.Stop();
         }
@@ -79,7 +75,7 @@ namespace HDT_Reconnector
             // Show reconnect button:
             // 1. When we want to resize to move it in menu
             // 2. When we're in the match
-            Visibility = Core.Game.IsInMenu? resizeGrip.Visibility : Visibility.Visible;
+            Visibility = Core.Game.IsInMenu? resize.resizeGrip.Visibility : Visibility.Visible;
 
             if (reconnect.Status == Reconnector.CONNECTION_STATUS.DISCONNECTED)
             {

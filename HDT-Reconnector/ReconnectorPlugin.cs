@@ -25,11 +25,12 @@ namespace HDT_Reconnector
 
         public string Author => "Hypervisor";
 
-        public Version Version => Version.Parse("1.3.1");
+        public Version Version => Version.Parse("1.4.0");
 
         public MenuItem MenuItem { get; private set; }
 
         private ReconnectPanel reconnectPanel;
+        private SimulatePanel simulatePanel;
 
         public void OnButtonPress()
         {
@@ -53,6 +54,20 @@ namespace HDT_Reconnector
                 try
                 {
                     reconnectPanel.OnUpdate();
+                }
+                catch (LogException ex)
+                {
+                    MenuItem.IsChecked = false;
+                    Log.Error(ex);
+                }
+
+            }
+
+            if (simulatePanel != null)
+            {
+                try
+                {
+                    simulatePanel.OnUpdate();
                 }
                 catch (LogException ex)
                 {
@@ -86,6 +101,12 @@ namespace HDT_Reconnector
                     reconnectPanel = new ReconnectPanel();
                     Core.OverlayCanvas.Children.Add(reconnectPanel);
                 }
+
+                if (simulatePanel == null)
+                {
+                    simulatePanel = new SimulatePanel();
+                    Core.OverlayCanvas.Children.Add(simulatePanel);
+                }
             };
 
             MenuItem.Unchecked += (sender, args) =>
@@ -94,6 +115,12 @@ namespace HDT_Reconnector
                 {
                     Core.OverlayCanvas.Children.Remove(reconnectPanel);
                     reconnectPanel = null;
+                }
+
+                using (simulatePanel)
+                {
+                    Core.OverlayCanvas.Children.Remove(simulatePanel);
+                    simulatePanel= null;
                 }
             };
         }

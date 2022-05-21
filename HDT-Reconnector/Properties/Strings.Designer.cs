@@ -77,5 +77,14 @@ namespace HDT_Reconnector.Properties {
                 return ResourceManager.GetString("Text_Reconnect", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Simulate.
+        /// </summary>
+        internal static string Text_Simulate {
+            get {
+                return ResourceManager.GetString("Text_Simulate", resourceCulture);
+            }
+        }
     }
 }

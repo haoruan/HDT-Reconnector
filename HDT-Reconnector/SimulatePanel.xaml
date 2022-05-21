@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="HDT_Reconnector.SimulatePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HDT_Reconnector"
+             xmlns:lex="http://wpflocalizeextension.codeplex.com"
+             lex:LocalizeDictionary.DesignCulture="en"
+             lex:ResxLocalizationProvider.DefaultAssembly="HDT-Reconnector"
+             lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+             mc:Ignorable="d" >
+    <Grid>
+        <Border x:Name="SimulateButton"
+                BorderBrush="#141617"
+                BorderThickness="2"
+                Background="#23272a"
+                Cursor="Hand"
+                MouseEnter="SimulateButton_MouseEnter"
+                MouseLeave="SimulateButton_MouseLeave"
+                MouseDown="SimulateButton_Click">
+            <local:OutlinedTextBlock x:Name="SimulateText" 
+                                     Text="{lex:Loc Text_Simulate}" 
+                                     TextAlignment="Center"
+                                     FontFamily="/HDT-Reconnector;component/Resources/#Chunkfive"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+            
+    </Grid>
+</UserControl>
