@@ -98,7 +98,7 @@ namespace HDT_Reconnector
 
                     if (!IsGameEnd())
                     {
-                        bgBoardStat.RestoreBoardStat();
+                        RestoreAfterReconnect();
                     }
                 }
             }
@@ -135,7 +135,7 @@ namespace HDT_Reconnector
                 if (IsAbleToReconnect())
                 {
                     // A simulation of disconnecting when game is closed on any gamemode
-                    bgBoardStat.SaveBoardStat();
+                    SaveBeforeReconnect();
                     lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
                     reconnect.Status = Reconnector.CONNECTION_STATUS.DISCONNECTED;
                 }
@@ -148,7 +148,7 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
-                bgBoardStat.SaveBoardStat();
+                SaveBeforeReconnect();
                 lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
                 lock (this)
                 {
@@ -198,6 +198,17 @@ namespace HDT_Reconnector
         {
             return Core.Game.CurrentGameStats != null &&
                 Core.Game.CurrentGameStats.EndTime > Core.Game.CurrentGameStats.StartTime;
+        }
+
+        private void SaveBeforeReconnect()
+        {
+            bgBoardStat.SaveBoardStat();
+            BobsBuddyHelper.Instance.SaveInput();
+        }
+
+        private void RestoreAfterReconnect()
+        {
+            bgBoardStat.RestoreBoardStat();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace HDT_Reconnector
     public class Settings
     {
 
-        public static Settings _settings;
+        private static Settings _settings;
         public ResizeSettings reconnect = new ResizeSettings();
         public ResizeSettings simulate = new ResizeSettings();
 

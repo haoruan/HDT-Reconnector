@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 
 using Core = Hearthstone_Deck_Tracker.API.Core;
 using Hearthstone_Deck_Tracker.BobsBuddy;
-using Hearthstone_Deck_Tracker.Enums;
+using Hearthstone_Deck_Tracker.Utility.Logging;
 using Hearthstone_Deck_Tracker.Controls.Overlay;
 using Entity = Hearthstone_Deck_Tracker.Hearthstone.Entities.Entity;
 using HearthDb.Enums;
@@ -64,7 +64,8 @@ namespace HDT_Reconnector
 
         public void OnUpdate()
         {
-            Visibility = Core.Game.CurrentGameMode == GameMode.Battlegrounds ? Visibility.Visible : resize.resizeGrip.Visibility;
+            Visibility = !Core.Game.IsInMenu && Core.Game.IsBattlegroundsMatch ?
+                Visibility.Visible : resize.resizeGrip.Visibility;
         }
 
         private void SimulateButton_Click(object sender, RoutedEventArgs e)
@@ -90,16 +91,16 @@ namespace HDT_Reconnector
 
         private void RunSimulation()
         {
-            // last opponent
-            int turnNumber = Core.Game.GetTurnNumber() - 1;
-
-            // BobsBuddyInvoker.GetInstance(Core.Game.CurrentGameStats.GameId, turnNumber, false)
-            var getInstance = Utils.GetTypeMethod("Hearthstone_Deck_Tracker.BobsBuddy.BobsBuddyInvoker", "GetInstance");
-            object[] parameters = { Core.Game.CurrentGameStats.GameId, turnNumber, false};
-            object obj = getInstance?.Invoke(null, parameters);
+            var obj = BobsBuddyHelper.GetInvokerInstance();
             if (obj == null)
             {
-                return;
+                // Try restore the input from last reconnect
+                BobsBuddyHelper.Instance.RestoreInput();
+                obj = BobsBuddyHelper.GetInvokerInstance();
+                if (obj == null)
+                {
+                    return;
+                }
             }
 
             var getOrderedMinions = Utils.GetTypeMethod("Hearthstone_Deck_Tracker.BobsBuddy.BobsBuddyUtils", "GetOrderedMinions");
@@ -118,7 +119,7 @@ namespace HDT_Reconnector
             BobsBuddyPanel bobsBuddyDisplay = (BobsBuddyPanel)get_BobsBuddyDisplay?.Invoke(obj, null);
 
             var setState = Utils.GetKnownTypeMethod(typeof(BobsBuddyPanel), "SetState");
-            parameters = new object[]{ BobsBuddyState.Combat };
+            var parameters = new object[]{ BobsBuddyState.Combat };
             setState?.Invoke(bobsBuddyDisplay, parameters);
 
             // Instance.RunAndDisplaySimulationAsync()
@@ -136,10 +137,22 @@ namespace HDT_Reconnector
             Input input = (Input)Utils.GetFieldValue(obj, "_input");
             if (input == null)
             {
-                return false;
+                BobsBuddyHelper.Instance.RestoreInput();
+                input = (Input)Utils.GetFieldValue(obj, "_input");
+                if (input == null)
+                {
+                    Log.Error("input is null");
+                    return false;
+                }
             }
 
             var playerHero = Core.Game.Player.Board.FirstOrDefault(x => x.IsHero);
+            if (playerHero == null)
+            {
+                Log.Error("playerHero is null");
+                return false;
+            }
+
             var playerTechLevel = playerHero.GetTag(GameTag.PLAYER_TECH_LEVEL);
 
             input.DamageCap = Core.Game.GameEntity.GetTag(GameTag.BACON_COMBAT_DAMAGE_CAP);
@@ -181,7 +194,7 @@ namespace HDT_Reconnector
                 Core.Game.OpponentEntity.IsCurrentPlayer ||
                 Core.Game.CurrentGameStats == null)
 			{
-                // We're not in the shopping stats, or it's our next turn
+                // It's our first turn, or we're not in the shopping stats
 				return false;
 			}
 

@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BattlegroundsBoardStat.cs" />
+    <Compile Include="BobsBuddyHelper.cs" />
     <Compile Include="Controls\OutlinedTextBlock.cs" />
     <Compile Include="LogHanlder\ConnectionLogHandler.cs" />
     <Compile Include="LogHanlder\LogWatcher.cs" />
