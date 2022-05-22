@@ -74,16 +74,29 @@ namespace HDT_Reconnector
             return BitConverter.ToUInt32(bytes, 0);
         }
 
+        public static MethodInfo GetTypeMethod(string name, string methodName)
+        {
+            var type = typeof(Log).Assembly.GetType(name);
+            return GetKnownTypeMethod(type, methodName);
+        }
+
+        public static MethodInfo GetKnownTypeMethod(Type type, string methodName)
+        {
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+            var method = type.GetMethod(methodName, bindingFlags);
+            return method;
+        }
+
         public static object GetFieldValue(object obj, string name) {
             // Set the flags so that private and public fields from instances will be found
-            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var field = obj.GetType().GetField(name, bindingFlags);
             return field?.GetValue(obj);
         }
 
         public static void SetFieldValue(object obj, string name, object value) {
             // Set the flags so that private and public fields from instances will be found
-            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var field = obj.GetType().GetField(name, bindingFlags);
             field?.SetValue(obj, value);
         }

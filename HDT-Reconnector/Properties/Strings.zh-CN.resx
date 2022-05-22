@@ -123,4 +123,7 @@
   <data name="Text_Reconnect" xml:space="preserve">
     <value>断线重连</value>
   </data>
+  <data name="Text_Simulate" xml:space="preserve">
+    <value>战斗模拟</value>
+  </data>
 </root>

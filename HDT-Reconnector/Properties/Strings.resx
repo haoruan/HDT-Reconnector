@@ -123,4 +123,7 @@
   <data name="Text_Reconnect" xml:space="preserve">
     <value>Reconnect</value>
   </data>
+  <data name="Text_Simulate" xml:space="preserve">
+    <value>Simulate</value>
+  </data>
 </root>
