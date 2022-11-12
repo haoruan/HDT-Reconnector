@@ -202,19 +202,13 @@ namespace HDT_Reconnector
 
         private void SaveBeforeReconnect()
         {
-            if (Core.Game.IsBattlegroundsMatch)
-            {
-                bgBoardStat.SaveBoardStat();
-                BobsBuddyHelper.Instance.SaveInput();
-            }
+            bgBoardStat.SaveBoardStat();
+            BobsBuddyHelper.Instance.SaveInput();
         }
 
         private void RestoreAfterReconnect()
         {
-            if (Core.Game.IsBattlegroundsMatch)
-            {
-                bgBoardStat.RestoreBoardStat();
-            }
+            bgBoardStat.RestoreBoardStat();
         }
     }
 }
