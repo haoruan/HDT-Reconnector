@@ -17,11 +17,6 @@ namespace HDT_Reconnector
 
         public void SaveBoardStat()
         {
-            if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
-            {
-                return;
-            }
-
             battlegroundsBoardState = Utils.GetFieldValue(Core.Game, "_battlegroundsBoardState");
             // Setting read-only automatically-implemented properties can be done through it's backing field
             var obj = (Dictionary<string, BoardSnapshot>)Utils.GetFieldValue(battlegroundsBoardState, "<LastKnownBoardState>k__BackingField");
@@ -31,11 +26,6 @@ namespace HDT_Reconnector
 
         public void RestoreBoardStat()
         {
-            if (Core.Game.CurrentGameMode != GameMode.Battlegrounds)
-            {
-                return;
-            }
-
             if (battlegroundsBoardState != null)
             {
                 Utils.SetFieldValue(battlegroundsBoardState, "<LastKnownBoardState>k__BackingField", lastKnownBoardState);
