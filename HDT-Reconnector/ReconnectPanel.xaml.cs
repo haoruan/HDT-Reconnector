@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,8 +10,6 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.IO;
 
 using Core = Hearthstone_Deck_Tracker.API.Core;
@@ -37,6 +36,8 @@ namespace HDT_Reconnector
         private RoutedEventHandler updatePositionHandler;
         private Resize resize;
         private BattlegroundsBoardStat bgBoardStat = new BattlegroundsBoardStat();
+        private Timer timer;
+        private readonly int disconnectTimeout = 20; // second
 
         public string RemoteAddr { get; set; } = null;
         public ushort RemotePort { get; set; } = 0;
@@ -47,6 +48,7 @@ namespace HDT_Reconnector
             Settings.Load();
 
             resize = new Resize(this, ReconnectButton, ReconnectText, Settings.Instance.reconnect);
+            timer = new Timer(new TimerCallback(DisconnectedTimeout));
 
             Visibility = Visibility.Collapsed;
             oriBrush = ReconnectButton.Background;
@@ -63,6 +65,7 @@ namespace HDT_Reconnector
 
         public void Dispose()
         {
+            timer.Dispose();
             Settings.Instance.reconnect = resize.settings;
             Settings.Save();
             resize.RemoveFromOverlayWindowPrivate();
@@ -92,9 +95,8 @@ namespace HDT_Reconnector
 
                 if (IsGameReStart() || IsGameEnd())
                 {
-                    reconnect.Status = Reconnector.CONNECTION_STATUS.CONNECTED;
                     ReconnectText.Text = Utils.GetLoc("Text_Reconnect");
-                    reconnect.ResumeConnect();
+                    reconnect.ResumeConnect(timer);
 
                     if (!IsGameEnd())
                     {
@@ -148,6 +150,7 @@ namespace HDT_Reconnector
         {
             if (IsAbleToReconnect())
             {
+                timer.Change(disconnectTimeout * 1000, 1000);
                 SaveBeforeReconnect();
                 lastGameStartTime = Core.Game.CurrentGameStats.StartTime;
                 lock (this)
@@ -155,6 +158,9 @@ namespace HDT_Reconnector
                     if (reconnect.Disconnect(RemoteAddr, RemotePort) == 0)
                     {
                         ReconnectText.Text = Utils.GetLoc("Text_Disconnected");
+                    }else
+                    {
+                        timer.Change(Timeout.Infinite, 0);
                     }
                 }
             }
@@ -215,6 +221,16 @@ namespace HDT_Reconnector
             {
                 bgBoardStat.RestoreBoardStat();
             }
+        }
+
+        private void DisconnectedTimeout(Object state)
+        {
+            Log.Info("Diconnect Timeout.");
+            ReconnectText.Dispatcher.Invoke(() =>
+            {
+                ReconnectText.Text = Utils.GetLoc("Text_Reconnect");
+            });
+            reconnect.ResumeConnect(timer);
         }
     }
 }
