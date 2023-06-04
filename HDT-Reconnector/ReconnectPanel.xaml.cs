@@ -29,7 +29,7 @@ namespace HDT_Reconnector
     {
         private Reconnector reconnect = new Reconnector();
         private DateTime lastGameStartTime;
-        private const string logSearchPattern = "hearthstone*.log";
+        private const string logSearchPattern = "Hearthstone.log";
         private bool hasRunningInit = false;
         private Brush oriBrush;
         private LogWatcher connectionLogWatcher = null;
@@ -111,19 +111,9 @@ namespace HDT_Reconnector
             // but it won't be a matter since we always restore the connection on game end.
             if (Core.Game.IsRunning && !hasRunningInit)
             {
-                var logDirectory = Path.Combine(Config.Instance.HearthstoneDirectory,
-                    Config.Instance.HearthstoneLogsDirectoryName);
-                var folder = new DirectoryInfo(logDirectory);
-                var logFiles = folder.GetFiles(logSearchPattern).OrderByDescending(f => f.CreationTime).ToList();
+                var logFileName = GetLog();
 
-                if (logFiles.Count == 0)
-                {
-                    throw new LogException(String.Format("Can't find any {0} in {1}", logSearchPattern, logDirectory));
-                }
-
-                Log.Info(String.Format("Find {0}", logFiles[0].FullName));
-
-                connectionLogWatcher = new LogWatcher(this, logFiles[0].FullName);
+                connectionLogWatcher = new LogWatcher(this, logFileName);
                 connectionLogWatcher.Start();
 
                 hasRunningInit = true;
@@ -231,6 +221,28 @@ namespace HDT_Reconnector
                 ReconnectText.Text = Utils.GetLoc("Text_Reconnect");
             });
             reconnect.ResumeConnect(timer);
+        }
+
+        private string GetLog()
+        {
+             var logDirectory = Path.Combine(Config.Instance.HearthstoneDirectory,
+                    Config.Instance.HearthstoneLogsDirectoryName);
+
+            try
+            {
+                var subDirs = new DirectoryInfo(logDirectory).GetDirectories();
+                var latest = subDirs.OrderByDescending(x => x.CreationTime).First();
+                var logFile = latest.GetFiles(logSearchPattern).First();
+
+                Log.Info(String.Format("Find {0}", logFile.FullName));
+
+                return logFile.FullName;
+            }
+            catch (Exception)
+            {
+
+                throw new LogException(String.Format("Can't find {0} in {1}", logSearchPattern, logDirectory));
+            }
         }
     }
 }
