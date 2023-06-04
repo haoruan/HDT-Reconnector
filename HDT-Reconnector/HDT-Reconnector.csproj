@@ -59,7 +59,8 @@
     <Reference Include="HearthDb">
       <HintPath>Reference\HearthDb.dll</HintPath>
     </Reference>
-    <Reference Include="Hearthstone Deck Tracker">
+    <Reference Include="Hearthstone Deck Tracker, Version=1.20.8.6136, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Reference\Hearthstone Deck Tracker.exe</HintPath>
     </Reference>
     <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
